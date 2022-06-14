@@ -24,6 +24,7 @@ Activate the virtual environment if you haven't already.
 
 ```sh
 export FLASK_APP=main
+export FLASK_ENV=development  # omit in production
 flask run
  * Running on http://127.0.0.1:5000/
 ```
