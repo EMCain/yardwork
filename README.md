@@ -24,7 +24,15 @@ Activate the virtual environment if you haven't already.
 
 ```sh
 export FLASK_APP=main
-export FLASK_ENV=development  # omit in production
+export FLASK_ENV=development
 flask run
  * Running on http://127.0.0.1:5000/
 ```
+
+# APIs and libraries used
+
+[National Weather Service](https://www.weather.gov/documentation/services-web-api#/default/gridpoint)
+
+[GeoCode](https://geopy.readthedocs.io/en/latest/index.html)
+
+[Nominatim](https://nominatim.org/release-docs/develop/api/Search/)

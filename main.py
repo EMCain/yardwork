@@ -1,6 +1,8 @@
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request as flask_request
+from geopy.geocoders import Nominatim
+import requests
 
 app = Flask(__name__)
 
@@ -37,15 +39,40 @@ def hello_world():
     return "<p>Hello, World!</p>"
 
 
-@app.route("/get-location-id", methods=["GET"])
-def get_location_id():
-    args = request.args
-    return f"This will eventually return a location identifier corresponding to the weather forecast API. {args}"
+@app.route("/get-nws-location-data", methods=["GET"])
+def get_nws_location_data():
+    args = flask_request.args
+    geolocator = Nominatim(user_agent="python_weather_app")
+    location = None
+    # eventually, have several options for getting the location
+    if "zip_code" in args:
+        location = geolocator.geocode(
+            query={
+                "postalcode": args["zip_code"],
+                "country": "USA",
+            }
+        )
+    else:
+        return (
+            "Please specify one of the following location identifiers in the GET params: zip_code",
+            400,
+        )
+
+    nws_url = f"https://api.weather.gov/points/{location.latitude},{location.longitude}"
+    res = requests.get(nws_url)
+    # TODO handle an error from the NWS API
+    properties = res.json()["properties"]
+    response = {
+        "office": properties["cwa"],
+        "x": properties["gridX"],
+        "y": properties["gridY"],
+    }
+    return jsonify(response)
 
 
 @app.route("/suggest/<location_id>")
 def suggest_days(location_id):
-    args = request.args
+    args = flask_request.args
     response = {"location_id": location_id, "chore_days": {}}
     chore_list = args.getlist("chore")
     start_day = date.today() + timedelta(days=1)  # tomorrow (TODO allow to customize)
